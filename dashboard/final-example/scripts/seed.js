@@ -1,4 +1,3 @@
-const { db } = require('@vercel/postgres');
 const {
   invoices,
   customers,
@@ -6,6 +5,7 @@ const {
   users,
 } = require('../app/lib/placeholder-data.js');
 const bcrypt = require('bcrypt');
+const postgres = require("postgres");
 
 async function seedUsers(client) {
   try {
@@ -161,14 +161,16 @@ async function seedRevenue(client) {
 }
 
 async function main() {
-  const client = await db.connect();
+  const client = {
+    sql: postgres(process.env.POSTGRES_URL, {
+      username: 'postgres'
+    })
+  };
 
   await seedUsers(client);
   await seedCustomers(client);
   await seedInvoices(client);
   await seedRevenue(client);
-
-  await client.end();
 }
 
 main().catch((err) => {
